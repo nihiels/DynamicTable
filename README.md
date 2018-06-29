@@ -1,17 +1,17 @@
 # DynamicTable
 DirectSmile Cross Media Extension to view and/or edit Data Relations.
 
-##Install
+## Install
 To install, download the DynamnicTable_vXX.zip and import it in DirectSmile Cross Media in the Extension Items browser.
 
-##Dependencies:
+## Dependencies:
 - DSMX v 7
 
 - dsmxapi -> https://github.com/nihiels/dsmxapi
 
 
 It provides a custom content item to add additional content to the table...
-##Custom Content
+## Custom Content
 Custom content features:
 The X-Item contains a sub item that describes the custom content with html elements in a div with the id customContent...
 ```
@@ -29,6 +29,6 @@ The X-Item contains a sub item that describes the custom content with html eleme
   </div>
 </div>
 ```
-###costom content supported attributes:
-- data-pos
+### costom content supported attributes:
+- data-pos<br />
 describes the position of the custom content. If it's a number, the content will be rendered in each row at the index of this number. 0 stands for the first column
