@@ -42,3 +42,24 @@ describes the position of the custom content. If it's a number, the content will
 - data-action<br />
     - add<br />
     opens a new record form according to the data-params JSON string. If data-params is empty, the form will render a text input field for every available column.
+    The object of the JSON string should be structured like this:
+    ```
+    {
+      [ColumnName]:{
+        "attrs":{
+          "type": "text",
+          "placeholder":'string',
+          "id":ColumnName,
+          "class":"form-control",
+          "name":ColumnName,
+          "data-validation":'notempty'//can be notempty or email so far.
+        },
+        "label":{
+          "attrs":{
+            "text":ColumnName,
+            "for":ColumnName
+          }
+        }
+      }
+    };
+    ```
