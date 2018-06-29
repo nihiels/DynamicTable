@@ -36,8 +36,8 @@
   */
   (function ( $ ) {
     var tableOptions = {};
-    var htmlEncode = function(t){     
-    return $("<div>").text(t).html().split('"').join('&quot;');
+    var htmlEncode = function(t){
+      return $("<div>").text(t).html().split('"').join('&quot;');
     };
     var replCustCont = function(row,t,cIs){
       var deb = 0;
@@ -71,7 +71,7 @@
       return newSettings;
     };
     var createML = function($t,settings,response,s){
-      
+
       //define trans
       if(settings.trans !== undefined){
         var trans = {};
@@ -82,14 +82,14 @@
       }
       //set cols
       settings.columns = settings.cols !== null && settings.cols[0] !== "" ? settings.cols.slice() : response.columns.slice();
-      //custom Content
+      //remove custom Content columns from DR columns request
       for(col in settings.content){
         if(!isNaN(Number(col))){
           settings.columns.splice(col, 0, settings.content[col].col);
-        }         
+        }
       }
 
-      //Table Head
+      //render Table Head if table mode and not already rendered
       if(settings.mode === "table"){
         var headExists = $t.find("thead").length === 0?false:true;
         if(!headExists){
@@ -106,9 +106,9 @@
             }else if(s !== undefined){
               sO = "";
             }
-            if(settings.content[c] !== undefined){        
+            if(settings.content[c] !== undefined){
               hcol = "";
-            }         
+            }
             var hs = "";
             var cname = settings.columns[c];
             if(settings.hideCols.indexOf(cname) !== -1){
@@ -117,28 +117,22 @@
             if(trans !== undefined && trans[cname] !== undefined){
               cname = trans[cname];
             }
-            $thr.append('<th data-col="'+hcol+'" '+hs+' data-dec="'+sO+'"><span>'+cname+'</span></th>');    
+            $thr.append('<th data-col="'+hcol+'" '+hs+' data-dec="'+sO+'"><span>'+cname+'</span></th>');
           }
-          
+
           if(settings.sort) $thr.find("th[data-col!='']").append('<div class="sort"></div>');
-          if(settings.filter)$thr.find("th[data-col!='']").append('<div class="filter"></div>');  
+          if(settings.filter)$thr.find("th[data-col!='']").append('<div class="filter"></div>');
           $th.append($thr);
-          $t.append($th);       
+          $t.append($th);
         }
-      }   
+      }
 
       //add rows
-      var xI = settings.cIs.xmediaID;
       var rows = response.rows;
-
       var $outer = settings.mode === "table" ? $("<tbody>") : $('<ul class="list-group"></ul>');
       var $inner = settings.mode === "table" ? $("<tr>"): $('<li class="list-group-item"></li>');
-
-     
-
-      //el,settings,rows,$outer,$inner
       methods.addRows($t,settings,rows,$outer,$inner);
-      
+
       //sum row
       if(settings.sumRow !== undefined){
         var sumRow = [];
@@ -155,12 +149,11 @@
               sumRow[c] = settings.sumRow[c];
             }
           }
-        } 
+        }
         methods.addRows($t,settings,[sumRow],$outer,$inner.addClass("sumRow active"));
       }
 
-   
-      //top
+      //add custom top content
       if(settings.content["top"] !== undefined){
         $("[data-from-dyn-table='"+settings.tableID+"']").remove();
         var $topContent = $(settings.content["top"]);
@@ -169,13 +162,13 @@
       }
 
       //appending markup
-      settings.mode === "table" ? $t.find("thead").after($outer) : $t.append($outer); 
+      settings.mode === "table" ? $t.find("thead").after($outer) : $t.append($outer);
       $t.parent().removeClass("loading");
-      
+
       //init pager
       if(settings.pager)pager($t,settings);
 
-      //init editability 
+      //init editability
       if(settings.editData === true || settings.editData.length > 0){
         initClick($t,settings);
       }
@@ -192,9 +185,8 @@
       if(!headExists && settings.sort)initSort($t,settings);
       if(!headExists && settings.filter)initFilter($t,settings);
     };
-    
+
     var fixHeader = function($t,settings){
-      //$t.css('position','relative');
       $tHeadrow = $t.find("thead tr");
       $tHead = $t.find("thead");
       var hSt = $t.position().top;
@@ -209,14 +201,13 @@
         $tHeadrow.css("top", wSt + 'px');
       };
 
-
+      //set new stick position while scrolling with timeout
       var timer;
-
-    $(window).scroll(function(){
-      var wSt = $(window).scrollTop();
-      if(wSt >= hSt){
-        stickIt(wSt,hSt);           
-          }
+      $(window).scroll(function(){
+        var wSt = $(window).scrollTop();
+        if(wSt >= hSt){
+          stickIt(wSt,hSt);
+        }
 
         if ( timer !== undefined) {clearTimeout(timer)};
 
@@ -241,23 +232,23 @@
                 display: 'table-header-group'
               });
             }
-            
-        }, 50);
-    });
-    };     
 
+        }, 50);
+      });
+    };
+
+    //methods object to provide these functions as plugin someday
     methods = {
       getSettings: function($el){
         return tableOptions[$el.attr("data-item-name")];
       },
       reload: function($el,overrides){
-        var options = mergeSettings($el,overrides);     
+        var options = mergeSettings($el,overrides);
         $el.html("");
-        //$el.dynTable(options);
         getRecords($el,options);
       },
       addRows: function($el,settings,rows,$outer,$inner){
-        //define trans
+        //set translations
         if(settings.trans !== undefined){
           var trans = {};
           for(var t = 0; t < settings.trans.length; t++){
@@ -265,23 +256,22 @@
             trans[trs[0]] = trs[1];
           }
         }
-        //settings-Logik für Funktionsaufruf von außerhalb noch bauen. mit methods.getSettings und setSettings
+
         var xI = settings.cIs.xmediaID;
         var activeRecord = settings.activeRecord;
         for(var r = 0; r < rows.length; r++){
           var cssClass = r%2 === 0?"even indexrow":"uneven indexrow";
           $inner.html("").removeClass("even uneven");
-          $inner.addClass(cssClass);        
+          $inner.addClass(cssClass);
           for(var cr = 0; cr < settings.columns.length; cr++){
             var rcol = settings.columns[cr];
             var t = rows[r][settings.cIs[rcol]] || "";
+            //render custom content
             if(settings.content[cr] !== undefined && !$inner.is(".sumRow")){
               t = settings.content[cr].td;
               t = replCustCont(rows[r],t,settings.cIs);
-              
               if(t.substr(0,8) === "<select "){
                 var $ht = $(t);
-                
                 var options = $ht.attr("data-options").split(",");
                 var values = $ht.attr("data-values").split(",") || $ht.attr("data-options").split(",");
                 for(var o = 0; o < options.length; o++){
@@ -291,18 +281,17 @@
                   });
                   $ht.append($option);
                 }
-                
-                t = $ht.prop('outerHTML');  
+                t = $ht.prop('outerHTML');
               }
-              
               rcol = "";
-            }         
-            
-            var ss = '';  
+            }
+
+            //additional styles
+            var ss = '';
             if(settings.tdStyles[cr] !== undefined){
               var w = settings.tdStyles[cr] || "";
               ss += w;
-            }         
+            }
             if(settings.hideCols.indexOf(rcol) !== -1){
               ss += 'display:none;';
             }
@@ -314,13 +303,12 @@
                 id: rcol+r
               };
 
-              //add multiline class
-              if(settings.multilineCols.indexOf(rcol) !== -1){
-                cellAttr.class = "indexcol multiline"
-              }
-            
+            //add multiline class
+            if(settings.multilineCols.indexOf(rcol) !== -1){
+              cellAttr.class = "indexcol multiline"
+            }
+
             if($inner.is("tr")){
-              //cellAttr.class += " cellContent";
               var $cellTd = $("<td>",cellAttr);
               $cellTd.html("").append('<span class="cellContent" data-col="'+rcol+'">'+t+'</span>');
               $inner.append($cellTd);
@@ -328,7 +316,7 @@
               var $cellDiv = $("<div>",cellAttr);
               if(settings.listLabels){
                 var hs = "";
-                var cname = settings.columns[cr];             
+                var cname = settings.columns[cr];
                 if(trans !== undefined && trans[cname] !== undefined){
                   cname = trans[cname];
                 }
@@ -336,36 +324,35 @@
                 $cellDiv.prepend('<span class="cellLabel">'+cname+'</span>');
                 $cellDiv.append('<span class="cellContent" data-col="'+rcol+'">'+t+'</span>');
               }
-              $inner.append($cellDiv);  
-            }                   
-          }
-          
+              $inner.append($cellDiv);
+            }
+          }//End each column
+
           $inner.attr("data-xd",rows[r][xI]);
           //active record
           if(rows[r][xI] === activeRecord){
             $inner.addClass("activeRecord");
           }else{
             $inner.removeClass("activeRecord");
-          } 
+          }
           $outer.append($inner.clone());
-        }
-      }   
+        }//End each row
+      }
     };
 
     var initSort = function($t,settings){
       $t.find("th[data-col!=''] .sort").click(function(){
         var $sth = $(this).parent();
-        var dec = $sth.attr("data-dec") === "true" || $sth.attr("data-dec") === "" ?"false":"true";   
-        settings.sortCols = [$sth.attr("data-col")]; 
-        settings.dec = dec;  
+        var dec = $sth.attr("data-dec") === "true" || $sth.attr("data-dec") === "" ?"false":"true";
+        settings.sortCols = [$sth.attr("data-col")];
+        settings.dec = dec;
         getRecords($t,settings,settings.rpp,[$sth.attr("data-col")],dec);
         $t.find("[data-dec]").removeAttr("data-dec");
-        $sth.attr("data-dec",dec);        
+        $sth.attr("data-dec",dec);
       });
     };
 
-    
-
+    //custom content functions
     var initCustomClicks = function($t,settings){
 
       var action = function(el){
@@ -374,21 +361,25 @@
         var xID = $tr.attr("data-xd");
 
         //dsmx button
+        /*
+          Fills input elements with selected values and clicks the button
+          it collects all data-col values of selected options and elems with the class indexcol
+            <select data-action="dsmx-btn" data-btn-class="className"></select>
+        */
         if($el.attr("data-change") === "dsmx-btn"){
-          //<select data-action="dsmx-btn" data-btn-class="className"></select>
           var $btn = $($("input[type='button']." + $el.attr('data-btn-class')+":first, ."+$el.attr('data-btn-class') + " input[type='button']:first")[0]);
           var cols = [];
           var vals = [];
           $el.closest(".indexrow").find("option[data-col!='']:selected,.indexcol[data-col!='']").each(function(){
             if($(this).attr("data-col") !== undefined){
-        var elCols = $(this).attr("data-col").split("|");
-        var elVals = $(this).attr("data-val") || $(this).val() || $(this).text();
-        elVals = elVals.split("|");
-        for(var c = 0; c < elCols.length; c++){
-          cols.push(elCols[c]);            
-          vals.push(elVals[c]);
-        }
-            }           
+              var elCols = $(this).attr("data-col").split("|");
+              var elVals = $(this).attr("data-val") || $(this).val() || $(this).text();
+              elVals = elVals.split("|");
+              for(var c = 0; c < elCols.length; c++){
+                cols.push(elCols[c]);
+                vals.push(elVals[c]);
+              }
+            }
           });
           for(var i = 0; i < cols.length; i++){
             $("input." + cols[i]+", ."+ cols[i]+" input").val(vals[i]);
@@ -397,17 +388,17 @@
         }
 
         //add new record
-        else if($el.attr("data-action") === "add"){       
+        else if($el.attr("data-action") === "add"){
           if($el.attr("data-params")!==''){
             try{
-            var params = JSON.parse($el.attr("data-params").replace(/\"/g,'\\\"').replace(/\'/g,'"'));
+              var params = JSON.parse($el.attr("data-params").replace(/\"/g,'\\\"').replace(/\'/g,'"'));
             }catch(er){
               alert("JSON parse error. Check Console for details");
               console.log(er);
               var params = {};
             }
           }else{
-            //no params in custom content. add all editable fields
+            //no params in custom content add elem. add all editable fields
             var params = {};
             for(var c = 0; c < settings.columns.length; c++){
               var col = settings.columns[c];
@@ -420,7 +411,7 @@
                     "class":"form-control",
                     "name":col
                   },
-                  "label":{     
+                  "label":{
                     "attrs":{
                       "text":col,
                       "for":col
@@ -429,7 +420,7 @@
                 };
               }
             }
-          }       
+          }
           //remove old panel if still in DOM
           $('#newLeadPanel'+settings.tableID).remove();
           //create new lead form
@@ -448,23 +439,23 @@
             var $fGroup = $('<div class="form-group"></div>');
             if(item.label !== undefined){
               var $label = $("<label>",item.label.attrs);
-              $fGroup.append($label); 
+              $fGroup.append($label);
             }
-            
+
             var $i = $("<input>",item.attrs);
             if(item.attrs.type === "select"){
               delete item.attrs.type;
               $i = $("<select>",item.attrs);
               for(var o = 0; o < item.options.length; o++){
                 $i.append('<option value="'+item.options[o].value+'">'+item.options[o].text+'</option>');
-              }             
+              }
             }
-            
-            $fGroup.append($i);         
+
+            $fGroup.append($i);
             $panelBody.append($fGroup);
           }
           var $addBtn = $('<button class="btn btn-default" id="newUser'+settings.tableID+'">'+$el.attr("data-btn-caption")+'</button>');
-          $panelBody.append($addBtn);         
+          $panelBody.append($addBtn);
           $panel.append($panelBody);
           $("body").prepend($panel);
           var l = $(window).width() / 2 - $panel.width() / 2 > 0 ? $(window).width() / 2 - $panel.width() / 2 : 0;
@@ -479,7 +470,7 @@
           $closebtn.click(function(){
             $panel.remove();
           });
-          
+
           $addBtn.click(function(ev){
             ev.preventDefault();
             var validations = {
@@ -494,11 +485,11 @@
                 email:function(mail){
                   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                     return re.test(mail);
-                } 
-              }             
+                }
+              }
             };
-            $panel.find("[data-validation]").each(function(){             
-                validations[$(this).attr("name")] = $(this).attr("data-validation");              
+            $panel.find("[data-validation]").each(function(){
+                validations[$(this).attr("name")] = $(this).attr("data-validation");
             });
             var nRecord = $('#newLeadPanel'+settings.tableID).find("input,textarea,select").serializeArray();
             //validation
@@ -523,14 +514,14 @@
               $firstNotValid.focus();
               $firstNotValid = undefined;
             }else{
-              var nrecTable = dsmxapi.formArrayToTable(nRecord);              
+              var nrecTable = dsmxapi.formArrayToTable(nRecord);
               dsmxapi.add({
                 table: nrecTable,
                 dr: settings.dataRelationName,
                 callback: function(r){
                   $panel.remove();
                   $el.remove();
-                  methods.reload($t);               
+                  methods.reload($t);
                   if($el.is("[data-success]")){
                     var f = eval($el.attr("data-success"));
                     f(el,nrecTable,settings.tableID);
@@ -538,8 +529,8 @@
                 }
               });
             }
-            
-          });           
+
+          });
         }//End add
 
         //update
@@ -548,12 +539,12 @@
           if($el.is("[data-updateval]")){
             var vals = $el.attr("data-updateval").split(",");
           }else{
-            var vals = [$el.find("option:selected").val()]; 
+            var vals = [$el.find("option:selected").val()];
           }
-          
+
           var updates = [];
           var customUpdates = function(ar){
-            var que = ar;           
+            var que = ar;
             updateRecord(settings,que[0].xID,que[0].col,que[0].val,que[0].t,function(){
               que.shift();
               if(que.length > 0){
@@ -561,10 +552,10 @@
               }else if($el.is("[data-success]")){
                 var f = eval($el.attr("data-success"));
                 f(el);
-              }             
+              }
             });
           };
-          for(var u = 0; u < cols.length; u++){           
+          for(var u = 0; u < cols.length; u++){
             var $td = $tr.find("[data-col='"+cols[u]+"']");
             $td.text(vals[u]);
             updates.push({
@@ -590,7 +581,7 @@
                 tdIndexes($t,settings);
               },settings.successFail)
             }, settings.failCallback);
-          }         
+          }
         }
         //dr-actions data-action="del" data-ex=\"delete\" data-params=\"dr:contacts,xid:<|xmediaID|>
         //Data relation button action
@@ -601,7 +592,7 @@
           var params = {};
           for(var p = 0; p < paramsAr.length; p++){
             var ppair = paramsAr[p].split(":");
-            params[ppair[0]] = ppair[1]; 
+            params[ppair[0]] = ppair[1];
           }
           var conf = !$el.is("[data-confirm]") || confirm($el.attr("data-confirm"));
           if(conf){
@@ -616,7 +607,7 @@
       };
       //data-action="delete" data-action="update" data-updatecol="Firstname" data-updateval"1"
       //"<div class=\"btn-group\" ><button data-params=\"Firstname:text:Vorname,Lastname:text:Nachname,Salutation:select:Anrede:Herr|Mr.;Frau|Mrs.\" class=\"btn btn-default\" data-action=\"add\" data-action=\"add\" data-title=\"New lead\">new lead</button></div>"
-      
+
       //Register custom handlers
       $("body").find("[data-action]").off('click').click(function(ev){
         ev.preventDefault();
@@ -653,9 +644,9 @@
 
     };
 
-    var initFilter = function($t,settings){   
+    var initFilter = function($t,settings){
       var finpChange = function($inp){
-        var t = $inp.val(),     
+        var t = $inp.val(),
           $td = $inp.parent();
           var col = $td.attr("data-col");
         $td.find("span").text(col + " ~ " + t);
@@ -665,7 +656,7 @@
           $td.find("span").text(col);
         }
         $td.attr("data-filter",t);
-        $inp.remove();  
+        $inp.remove();
 
         var $activeFilters = $t.find("th[data-filter]");
         var thFilterString = "";
@@ -684,9 +675,9 @@
           settings.query.filter = "("+settings.query.oFilter+" And " + thFilterString + ")";
         }
         else{
-          settings.query.filter = thFilterString; 
+          settings.query.filter = thFilterString;
         }
-         
+
           if(t !== prevFilter){
             dsmx.api.dataRelations.count(settings.dataRelationName, settings.query, function(result){
             settings.successCallback(result,function(c){
@@ -694,9 +685,9 @@
               getRecords($t,settings,settings.rpp);
             },settings.successFail);
           }, settings.failCallback);
-            
+
           }
-          
+
       };
 
       var fclick = function($f){
@@ -706,23 +697,23 @@
           class:"filter",
           value: ch
           });
-        
 
-        $finp.focusout(function(){      
+
+        $finp.focusout(function(){
           finpChange($(this));
         });
-        $finp.keydown(function(ev){       
+        $finp.keydown(function(ev){
           var code = ev.keyCode || ev.which;
           if (code == 13 || code == 9) {
             ev.preventDefault();
             finpChange($(this));
-          }     
+          }
         });
         $f.parent().append($finp);
         $finp.focus().select();
       };
-      $t.find("th[data-col!=''] .filter").click(function(){   
-        fclick($(this));    
+      $t.find("th[data-col!=''] .filter").click(function(){
+        fclick($(this));
       });
     };
 
@@ -733,7 +724,7 @@
           return $(that).attr("data-col") !== "" && settings.editBlacklist.indexOf($(that).attr("data-col")) === -1 && (settings.editData.indexOf($(that).attr("data-col")) !== -1 || settings.editData.indexOf($(that).find("span").attr("data-col")) !== -1);
         }else{
           return $(that).attr("data-col") !== "" && settings.editBlacklist.indexOf($(that).attr("data-col")) === -1;
-        }   
+        }
       };
       var $tds = $t.find(".indexcol").filter(function() {
         return clickfilter(this);
@@ -759,8 +750,8 @@
     };
 
     var initClick = function($t,settings){
-      var tdclick = function($td){    
-        $td.off("click");   
+      var tdclick = function($td){
+        $td.off("click");
         var inpKey = function(ev,$inp){
           var ix = Number($inp.closest("[data-ix"+settings.tableID+"]").attr("data-ix" + settings.tableID));
           var tdp = Number($inp.closest("[data-it"+settings.tableID+"]").attr("data-it" + settings.tableID));
@@ -768,8 +759,8 @@
           var code = ev.keyCode || ev.which;
           var goNext = function(ev){
             ix++;
-            var $nx = $("[data-ix"+settings.tableID+"='"+ix+"']");  
-            if($nx.length > 0){              
+            var $nx = $("[data-ix"+settings.tableID+"='"+ix+"']");
+            if($nx.length > 0){
                 ev.preventDefault();
                 inpChange($inp);
                 $nx.click();
@@ -777,14 +768,14 @@
           };
           var goPrev = function(ev){
             ix--;
-            var $nx = $("[data-ix"+settings.tableID+"='"+ix+"']");  
+            var $nx = $("[data-ix"+settings.tableID+"='"+ix+"']");
             if($nx.length > 0){
               ev.preventDefault();
               inpChange($inp);
               $nx.click();
             }
           };
-          var goDown = function(ev){        
+          var goDown = function(ev){
             trp++;
             var $dtd = $(".indexrow[data-rx"+settings.tableID+"='"+trp+"'] .indexcol[data-it"+settings.tableID+"='"+tdp+"']");
             if($dtd.length > 0){
@@ -807,33 +798,33 @@
           if (code == '9' || code == '13') {
             if(!$inp.is("textarea")){
               goNext(ev);
-            }            
+            }
           }else if(code == '38'){
             //up
             if(!$inp.is("textarea")){
               goUp(ev);
             }else{
-              var pos = $inp.getCursorPosition();     
+              var pos = $inp.getCursorPosition();
               if(pos == 0){
                 goUp(ev);
-              } 
+              }
             }
 
           }else if (code == '37'){
-            //left    
-            var pos = $inp.getCursorPosition();     
+            //left
+            var pos = $inp.getCursorPosition();
             if(pos == 0){
               goPrev(ev);
-            } 
+            }
           }
           else if (code == '39'){
             //right
             var tl = $inp.val().length;
-            var pos = $inp.getCursorPosition();     
+            var pos = $inp.getCursorPosition();
             if(tl == pos){
               goNext(ev);
             }
-            
+
           }
           else if (code == '40'){
             //down
@@ -841,31 +832,31 @@
               goDown(ev);
             }else{
               var tl = $inp.val().length;
-              var pos = $inp.getCursorPosition();     
+              var pos = $inp.getCursorPosition();
               if(tl == pos){
                 goDown(ev);
-              } 
+              }
             }
           }
 
         };
 
-        var inpChange = function($inp){ 
+        var inpChange = function($inp){
           var t = $inp.val(),
             v = $inp.attr("data-oldv"),
-            xid = $inp.attr("data-xid"),    
+            xid = $inp.attr("data-xid"),
             $td = $inp.parent();
-            var col = $td.attr("data-col");            
-            $td.text(t);          
-          
-          $inp.remove();  
+            var col = $td.attr("data-col");
+            $td.text(t);
+
+          $inp.remove();
           $td.click(function(){
             tdclick($(this));
           });
-          
-          if(t !== v){    
-            updateRecord(settings,xid,col,t,$td);   
-          } 
+
+          if(t !== v){
+            updateRecord(settings,xid,col,t,$td);
+          }
         };
 
         settings.me.find(".inp").each(function(){
@@ -892,9 +883,9 @@
           inputAttrs.class = "form-control inp";
           inputAttrs.rows = "4";
         }
-        
+
          var $inp = $(inputTag,inputAttrs);
-          
+
         $inp.val(v);
         $td.text("");
         $td.append($inp);
@@ -904,19 +895,19 @@
             inpKey(ev,$(this));
           });
         }
-        
 
-        $inp.focusout(function(){     
+
+        $inp.focusout(function(){
           if(!settings.disableChange)inpChange($(this));
         });
-      };    
+      };
       var $tds = tdIndexes($t,settings);
       $tds.click(function(){
         var $that = $(this);
         if(!$that.is(".cellContent")){
           $that = $that.find(".cellContent");
         }
-        tdclick($that); 
+        tdclick($that);
       });
     };
 
@@ -949,7 +940,7 @@
           }
           if(pp !== settings.page){
             getRecords($t,settings);
-          } 
+          }
         });
 
       }
@@ -960,36 +951,36 @@
       if(settings.page === settings.mpage){
         toR = settings.all;
       }
-      
+
       var pText = settings.pText.replace(/\{all\}/g,settings.all).replace(/\{p\}/g,settings.page).replace(/\{mp\}/g,settings.mpage).replace(/\{x\}/g,fromR).replace(/\{y\}/g,toR);
       $pd.html(pText);
-      
+
       //pager Select
       if($ppSelect.find("option").length === 0){
         var stepper = settings.psteps;
         var $option = $("<option>");
-        while(stepper < settings.maxPerPage && stepper < settings.all){   
+        while(stepper < settings.maxPerPage && stepper < settings.all){
           $option.text(stepper);
           $option.attr("value",stepper);
           stepper += settings.psteps;
-          $ppSelect.append($option.clone());          
+          $ppSelect.append($option.clone());
         }
         var maxOption = settings.all < settings.maxPerPage ? settings.all : settings.maxPerPage;
         $option.text(maxOption);
         $option.attr("value",maxOption);
-        $ppSelect.append($option.clone());      
-      } 
+        $ppSelect.append($option.clone());
+      }
       //select rpp
       if(settings.rpp > settings.all){
         settings.rpp = settings.all;
       }
       $ppSelect.find("option[value='"+settings.rpp+"']").prop("selected",true);
     };
-    
+
 
 
     var updateRecord = function(settings,xid,col,val,$td,cb){
-      $td.addClass("updating");     
+      $td.addClass("updating");
 
       //The records that should be updatet
       var table = {
@@ -999,7 +990,7 @@
         ]
       };
 
-      
+
       dsmx.api.dataRelations.update(settings.dataRelationName, table, function(result){
         settings.successCallback(result,function(){
           $td.removeClass("updating");
@@ -1015,9 +1006,9 @@
       });
     };
 
-    
 
-    var getCount = function($t,settings){   
+
+    var getCount = function($t,settings){
       dsmx.api.dataRelations.count(settings.dataRelationName, settings.query, function(result){
         settings.successCallback(result,function(c){
           settings.all = c;
@@ -1025,19 +1016,19 @@
         },settings.successFail);
       }, settings.failCallback);
     };
-    
-      
+
+
     var getRecords = function($t,settings,rpp,s,dec){
       $t.find("tbody").html('');
       $t.parent().addClass("loading");
       settings.query.currentPage = settings.page;
-      settings.query.perPage = rpp || settings.rpp;  
+      settings.query.perPage = rpp || settings.rpp;
       settings.query.orderBy = s || settings.sortCols;
       if(settings.query.orderBy !== null && settings.query.orderBy[0] === ""){
         settings.query.orderBy = null;
       }
       var sObject = s !== undefined ? {name:s[0],dec:dec} : undefined;
-      settings.query.descendingSortOrder = dec || settings.dec;  
+      settings.query.descendingSortOrder = dec || settings.dec;
       dsmx.api.dataRelations.get(settings.dataRelationName, settings.query, function(result){
         settings.successCallback(result,function(responseObject){
           //set col indexes
@@ -1045,11 +1036,11 @@
             settings.cIs[responseObject.columns[e]] = e;
             tableOptions[settings.tableID].cIs[responseObject.columns[e]] = e;
           }
-          createML($t,settings,responseObject,sObject);       
-        },settings.successFail);    
+          createML($t,settings,responseObject,sObject);
+        },settings.successFail);
         }, settings.failCallback);
     };
-    
+
       $.fn.dynTable = function( options, overrides ) {
         //Store return object in $t
         var $t = this;
@@ -1057,7 +1048,7 @@
           methods[options]($t,overrides);
         }else{
           //define Settings from Defaults and Options
-            var settings = mergeSettings($t,options);//$.extend({},$.fn.dynTable.settings, options );         
+            var settings = mergeSettings($t,options);//$.extend({},$.fn.dynTable.settings, options );
             settings.me = $t;
             //Filter Handling
 
@@ -1074,7 +1065,7 @@
           if(settings.query.filter.indexOf("noencode_") !== -1){
             settings.query.filter = null;
             $("body").prepend($("<h1>Filter ignored in designer view (variable used)</h1>"));
-          } 
+          }
             }else{
               settings.query.filter = null;
             }
@@ -1085,17 +1076,17 @@
               if(settings.query.mode === "data"){
                 settings.query.columns.push("xmediaID");
                 settings.hideCols.indexOf("xmediaID") === -1 ? settings.hideCols.push("xmediaID"):"";
-              }         
+              }
             }else if(settings.query.columns[0] === ""){
               settings.query.columns = null;
-            } 
+            }
 
             //start
         getCount($t,settings);
         }
-        
+
           //Chaining...
-          return $t; 
+          return $t;
       };
 
       $.fn.dynTable.settings = {
@@ -1135,29 +1126,29 @@
         tdStyles:[],
         cIs:{},
         callback:undefined,
-        failCallback: function() {  
+        failCallback: function() {
             alert('Unable to update records');
         },
         successFail: undefined,
         onInteraction: undefined,
-        successCallback: function(result,cb,fcb) {    
+        successCallback: function(result,cb,fcb) {
           if(result.state != 0) {
             if(fcb !== undefined){
               fcb(result);
             }else{
-              alert('[' + result.failureDetail + '] ' + result.failureMessage); 
+              alert('[' + result.failureDetail + '] ' + result.failureMessage);
             }
           } else {
             if(cb!== undefined){
-              cb(result.responseObject);  
+              cb(result.responseObject);
             }
             if(this.onInteraction !== undefined){
               this.onInteraction();
-            }           
+            }
           }
         },
         sticky: false
-      
+
     };
     $.fn.getCursorPosition = function() {
           var input = this.get(0);
@@ -1175,4 +1166,3 @@
           }
       };
   }( jQuery ));
-
