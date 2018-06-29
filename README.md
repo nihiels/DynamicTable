@@ -36,7 +36,7 @@ The X-Item contains a sub item that describes the custom content with html eleme
   </div>
 </div>
 ```
-### costom content supported attributes:
+### Costom Content supported attributes:
 - data-pos<br />
 describes the position of the custom content. If it's a number, the content will be rendered in each row at the index of this number. 0 stands for the first column
 - data-action<br />
@@ -63,3 +63,10 @@ describes the position of the custom content. If it's a number, the content will
       }
     };
     ```
+    - update<br />
+    updates the current record via AJAX. Column names and values will be specified like this:
+    ```html
+      data-updatecol="columns1,column2,..."
+      data-updateval="value1,value2,..."
+    ```
+    or if it's a select field, the function will search for the selected option
