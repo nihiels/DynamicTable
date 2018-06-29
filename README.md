@@ -40,3 +40,5 @@ The X-Item contains a sub item that describes the custom content with html eleme
 - data-pos<br />
 describes the position of the custom content. If it's a number, the content will be rendered in each row at the index of this number. 0 stands for the first column
 - data-action<br />
+    - add<br />
+    opens a new record form according to the data-params JSON string. If data-params is empty, the form will render a text input field for every available column.
