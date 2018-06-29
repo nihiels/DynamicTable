@@ -2,7 +2,7 @@
 DirectSmile Cross Media Extension to view and/or edit Data Relations.
 
 ## Install
-To install, download the DynamnicTable_vXX.zip and import it in DirectSmile Cross Media in the Extension Items browser.
+To install, download the DynamnicTable.zip and import it in DirectSmile Cross Media in the Extension Items browser.
 
 ## Dependencies:
 - DSMX v 7
