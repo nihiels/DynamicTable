@@ -1,8 +1,9 @@
   /*Copyright 2017 nils pfeifenberger
 
-  Dynamic Table v 1.47
+  Dynamic Table v 1.48
 
   change Log:
+  1.48 More comments and optimizations
   1.47 sumRow
   1.46 Append table item to callback (NOT CHECKED IN)
   1.46 width bugfix fix
@@ -360,6 +361,7 @@
         var $tr = $el.closest(".indexrow");
         var xID = $tr.attr("data-xd");
 
+        var conf = !$el.is("[data-confirm]") || confirm($el.attr("data-confirm"));
         //dsmx button
         /*
           Fills input elements with selected values and clicks the button
@@ -565,7 +567,6 @@
               t: $td
             });
           }
-          var conf = !$el.is("[data-confirm]") || confirm($el.attr("data-confirm"));
           if(conf){
             customUpdates(updates);
           }
@@ -573,7 +574,6 @@
 
         //delete
         else if($el.attr("data-action") === "delete"){
-          var conf = !$el.is("[data-confirm]") || confirm($el.attr("data-confirm"));
           if(conf){
             dsmx.api.dataRelations.delete(settings.dataRelationName, xID, function(res){
               settings.successCallback(res,function(){
@@ -594,7 +594,7 @@
             var ppair = paramsAr[p].split(":");
             params[ppair[0]] = ppair[1];
           }
-          var conf = !$el.is("[data-confirm]") || confirm($el.attr("data-confirm"));
+
           if(conf){
             dsmx.api.dataRelations.execute(dr, btnA, params, function(res){
               settings.successCallback(res,function(){
@@ -1091,11 +1091,11 @@
 
       $.fn.dynTable.settings = {
       // Defaults
-              pager: false,
-              pText: "Seite {p} von {mp}, Daten {x} bis {y} von {all}",
-              pagerSelector: "div.pager",
-              dataRelationName: "CampaignDatabase",
-              editBlacklist:["LpLogin","xmediaID","DSM_LeadScore","DSM_LeadScoreSync"],
+        pager: false,
+        pText: "Seite {p} von {mp}, Daten {x} bis {y} von {all}",
+        pagerSelector: "div.pager",
+        dataRelationName: "CampaignDatabase",
+        editBlacklist:["LpLogin","xmediaID","DSM_LeadScore","DSM_LeadScoreSync"],
         psteps: 10,
         tableID:"",
         mode: "table",
