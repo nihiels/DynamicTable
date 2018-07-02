@@ -11,6 +11,61 @@ To install, download the DynamnicTable.zip and import it in DirectSmile Cross Me
 
 ## Item Parameters
 ![Parameter screen shot](dynTableParams.png "DynamicTable Params")
+### DR Parameters
+- DR (Data Relation)<br />
+  Data Relation that should be loaded. If deactivated, the primary DB will be displayed
+- Columns to hide<br />
+  Comma separated string to specify columns that should not be displayed
+- Restrict to columns<br />
+  Comma separated string to define which columns are to be loaded
+- Order by<br />
+  Comma separated string to define sort orders
+- Descending Order<br />
+  If checked, the order will be descending
+- Filter<br />
+  A filter can be specified here. The filter must be formatted like the DSMX Web API is expecting it. ((<|FirstName|> = '') And ((<|xmediaID|> > '2') Or (<|xmediaID|> = '2')))
+  <b>Hint:</b> The X-Item provides a filter converter that makes it very easy to convert Data Relation Filter to the expected format.<br />
+  <b>Attention:</b> Filters, defined as a parameter here are visible in the source code of the web site and can be manipulated. Security relevant filters must be specified in the data relation.
+- Records per page<br />
+  Defines the number of records to load and display.
+- Mode<br />
+  Can be distinct or data. To support distinct output, the source relation has to be created in distinct mode as well.
+- Translate column names<br />
+  Her you can specify translations for the column names. It expects a comma and double point separated string like this: column1:trans1,column2:trans2
+- sumRow<br />
+  If activated the item will render an additional row where all columns that contain numbers are summed up. If the parameter contains a comma separated string, it should display these strings at the particular index in the sum row.
+### Design Parameters
+- List Mode<br />
+  If activated, the item will render a <ul><li></li></ul> list instead of a table.
+- Sticky header<br />
+  If activated and the item is running not in List Mode, the table head row will follow the scroll position if the table is larger than the window.
+- List Labels<br />
+  If the item is running in List Mode and List Labels is activated, Column names or their translations will be displayd as labels for each list value.
+- Body-Style and Head-Style<br />
+  DSMX Styles can be selected here.
+- BootstrapStyle<br />
+  DSMX v7 provides Bootstrap 3.3.5 as included CSS library for extension items. So I implemented a parameter to choose the Bootstrap table style here.
+- TableHeadPadding<br />
+  If table filtering and/or sorting is activated, this setting is useful to define a margin for the sort and/or filter images.
+- Table Head Background Color<br />
+  Set the background color of your table head.
+- Table Data Padding<br />
+  Defines a padding for each data cellLabel.
+- Show sort images<br />
+  When activated and Sorting in Setttings is activated, the sort image will be shown without mouse over.
+- TD Styles<br />
+  This parameter expects a comma separated string for inline css style declarations.
+  ```
+    {stylesColumn1},{stylesColumn2}
+  ```
+- Loading image<br />
+  This image will be shown while the data is loaded from the server.
+- Update Image<br />
+  Will be shown when updating a record.
+- active Record<br />
+  defines the table row background color of a selected record
+### Pager Parameters
+- will follow
 
 ## Custom Content
 Custom content features:
