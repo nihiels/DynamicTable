@@ -65,12 +65,61 @@ To install, download the DynamnicTable.zip and import it in DirectSmile Cross Me
 - active Record<br />
   defines the table row background color of a selected record
 ### Pager Parameters
-- will follow
+Activate the parameter group to render a page navigation that supports the following parameters and features:
+- Align<br />
+  Configure the alignment of the pager container (left, center or right).
+- Style<br />
+  Choose a dsmx style for the pager container here.
+- Show Select<br />
+  Renders a select element, where users can select the records per page number.
+- Records per page steps<br />
+  Defines the steps of the records per page selector.
+- Max records per page<br />
+  The maximum number the select item should show.
+- Pager text<br />
+  Any HTML code to view the pager text. it Supports placeholders for the following numbers:
+  ```html
+    <div style="display:inline">
+      Page {p} of {mp}; Records {x} to {y} from {all}
+    </div>      
+  ```
+  <b>make sure your markup is just one line (The X-Item parameter doesn't like line breaks)</b>
+- First, Previous, Next and Last buttons
+  Choose button images here.
+### Settings Parameters
+- Enable cursor navigation<br />
+  Activate this checkbox to enable cursor navigation for the inline editing feature. It allows to navigate the cursor with the keyboard arrow keys.
+- Editable columns<br />
+  When activated and no columns are specified, all visible cells are editable. To restrict edit ability, type in column names, comma separated.
+- Sort Image<br />
+  Enable this checkbox to make each column sortable.
+- Bottom right sort image<br />
+  Defines the position of the image from bottom right. Therefore other values will be ignored.
+- Bottom right filter image<br />
+  Defines the position of the image from bottom right. Therefore other values will be ignored.
+- Filter image<br />
+  Activate this box to let users define their own filters. The filter is searching with 'contains' and will be combined with other defined filters.
+- No submit on enter<br />
+  Overwrite the default button function of DSMX to do nothing.
+- SuccessFail<br />
+  Javascript fail callback function for API errors of loading or updating via DSMX Web API
+- onInteraction<br />
+  Javascript callback function for interactions like paging or updating records.
+- callback<br />
+  Javascript callback function for when the item is loaded and rendered completely.
+- Multiline Columns<br />
+  Comma separated string to define columns that should support content with line breaks for inline editing.
+
+### Debug Parameters
+- disableFocusout<br />
+If activated, the focusout event wont get fired when inline editing is active. It's meant to inspect the text input when editing data with any web developer tool.
+- Show Filter Converter<br />
+If activated, the item will render two text areas. You can paste any created Data Relation filter (of the DSMX DR Filter Configurator) into the first area. The second area will show the converted filter that can be pasted into the filter parameter field of the extension item. Please use the Data Relation that is configured for the item to create filters. Otherwise the field names are not replaced correctly.
 
 ## Custom Content
 Custom content features:
 The X-Item contains a sub item that describes the custom content with html elements in a div with the id customContent...
-```
+```html
 <div class="customContent">
   <div data-pos="0" data-label="">
     <div class="btn-group" >

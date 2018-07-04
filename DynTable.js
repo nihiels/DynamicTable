@@ -3,7 +3,7 @@
   Dynamic Table v 1.48
 
   change Log:
-  1.48 More comments and optimizations
+  1.48 Fix: prevented new record form from opening on enter
   1.47 sumRow
   1.46 Append table item to callback (NOT CHECKED IN)
   1.46 width bugfix fix
@@ -893,6 +893,14 @@
         if(settings.cursor){
           $inp.keydown(function(ev){
             inpKey(ev,$(this));
+          });
+        }else{
+          $inp.keydown(function(ev){
+            var code = ev.keyCode || ev.which;
+            if ($inp.is("input") && code == 13 || code == 9) {
+              ev.preventDefault();
+              $inp.trigger('focusout');
+            }
           });
         }
 
