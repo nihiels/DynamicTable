@@ -36,7 +36,7 @@ To install, download the DynamnicTable.zip and import it in DirectSmile Cross Me
   If activated the item will render an additional row where all columns that contain numbers are summed up. If the parameter contains a comma separated string, it should display these strings at the particular index in the sum row.
 ### Design Parameters
 - List Mode<br />
-  If activated, the item will render a <ul><li></li></ul> list instead of a table.
+  If activated, the item will render an HTML list instead of a table.
 - Sticky header<br />
   If activated and the item is running not in List Mode, the table head row will follow the scroll position if the table is larger than the window.
 - List Labels<br />
