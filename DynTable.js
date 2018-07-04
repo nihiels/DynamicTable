@@ -1056,45 +1056,43 @@
           methods[options]($t,overrides);
         }else{
           //define Settings from Defaults and Options
-            var settings = mergeSettings($t,options);//$.extend({},$.fn.dynTable.settings, options );
-            settings.me = $t;
-            //Filter Handling
+          var settings = mergeSettings($t,options);//$.extend({},$.fn.dynTable.settings, options );
+          settings.me = $t;
+          //Filter Handling
 
-            //Save original filter for client Filtering
-            if (settings.query.filter !== null && settings.query.filter !== ""){
-              //unencode html encodings of filter string
-              var $temp = $("<div>",{
-                html: settings.query.filter
-              });
-              settings.query.filter = $temp.text();
-              $temp = null;
-              settings.query.oFilter = settings.query.filter;
-              //Variable used in Designer
-          if(settings.query.filter.indexOf("noencode_") !== -1){
-            settings.query.filter = null;
-            $("body").prepend($("<h1>Filter ignored in designer view (variable used)</h1>"));
-          }
-            }else{
+          //Save original filter for client Filtering
+          if (settings.query.filter !== null && settings.query.filter !== ""){
+            //unencode html encodings of filter string
+            var $temp = $("<div>",{
+              html: settings.query.filter
+            });
+            settings.query.filter = $temp.text();
+            $temp = null;
+            settings.query.oFilter = settings.query.filter;
+            //Variable used in Designer
+            if(settings.query.filter.indexOf("noencode_") !== -1){
               settings.query.filter = null;
+              $("body").prepend($("<h1>Filter ignored in designer view (variable used)</h1>"));
             }
-            //End Filter Handling
+          }else{
+            settings.query.filter = null;
+          }
+          //End Filter Handling
 
-            //Check Columns
-            if(settings.query.columns !== null && settings.query.columns[0] !== "" && settings.query.columns.indexOf("xmediaID") === -1){
-              if(settings.query.mode === "data"){
-                settings.query.columns.push("xmediaID");
-                settings.hideCols.indexOf("xmediaID") === -1 ? settings.hideCols.push("xmediaID"):"";
-              }
-            }else if(settings.query.columns[0] === ""){
-              settings.query.columns = null;
+          //Check Columns
+          if(settings.query.columns !== null && settings.query.columns[0] !== "" && settings.query.columns.indexOf("xmediaID") === -1){
+            if(settings.query.mode === "data"){
+              settings.query.columns.push("xmediaID");
+              settings.hideCols.indexOf("xmediaID") === -1 ? settings.hideCols.push("xmediaID"):"";
             }
-
-            //start
-        getCount($t,settings);
+          }else if(settings.query.columns[0] === ""){
+            settings.query.columns = null;
+          }
+          //start
+          getCount($t,settings);
         }
-
-          //Chaining...
-          return $t;
+        //Chaining...
+        return $t;
       };
 
       $.fn.dynTable.settings = {
