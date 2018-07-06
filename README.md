@@ -84,7 +84,7 @@ Activate the parameter group to render a page navigation that supports the follo
     </div>      
   ```
   <b>make sure your markup is just one line (The X-Item parameter doesn't like line breaks)</b>
-- First, Previous, Next and Last buttons
+- First, Previous, Next and Last buttons<br />
   Choose button images here.
 ### Settings Parameters
 - Enable cursor navigation<br />
