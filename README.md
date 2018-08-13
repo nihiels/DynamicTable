@@ -118,7 +118,7 @@ If activated, the item will render two text areas. You can paste any created Dat
 
 ## Custom Content
 Custom content features:
-The X-Item contains a sub item that describes the custom content with html elements in a div with the id customContent...
+The X-Item contains a sub item that describes the custom content with html elements in a div with the class customContent...
 ```html
 <div class="customContent">
   <div data-pos="0" data-label="">
