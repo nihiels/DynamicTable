@@ -1,8 +1,9 @@
   /*Copyright 2017 nils pfeifenberger
 
-  Dynamic Table v 1.48
+  Dynamic Table v 1.49
 
   change Log:
+  1.49 Fix: added confirmation to dsmx-btn from custom content
   1.48 Fix: prevented new record form from opening on enter
   1.47 sumRow
   1.46 Append table item to callback (NOT CHECKED IN)
@@ -368,7 +369,7 @@
           it collects all data-col values of selected options and elems with the class indexcol
             <select data-action="dsmx-btn" data-btn-class="className"></select>
         */
-        if($el.attr("data-change") === "dsmx-btn"){
+        if($el.attr("data-change") === "dsmx-btn" && conf){
           var $btn = $($("input[type='button']." + $el.attr('data-btn-class')+":first, ."+$el.attr('data-btn-class') + " input[type='button']:first")[0]);
           var cols = [];
           var vals = [];
