@@ -1,8 +1,9 @@
-/*Copyright 2017 nils pfeifenberger
+/*Copyright 2019 nils pfeifenberger
 
 Dynamic Table v 1.50
 
 change Log:
+1.50 added editable list mode without labels
 1.50 Fix: width change on input changed to take outer width
 1.50 Fix: detach click event on input was not set correcy and reselected the text again
 1.49 Fix: added confirmation to dsmx-btn from custom content
@@ -320,16 +321,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             $inner.append($cellTd);
           }else{
             var $cellDiv = $("<div>",cellAttr);
+            $cellDiv.html("");
             if(settings.listLabels){
               var hs = "";
               var cname = settings.columns[cr];
               if(trans !== undefined && trans[cname] !== undefined){
                 cname = trans[cname];
               }
-              $cellDiv.html("");
               $cellDiv.prepend('<span class="cellLabel">'+cname+'</span>');
-              $cellDiv.append('<span class="cellContent" data-col="'+rcol+'">'+t+'</span>');
             }
+            $cellDiv.append('<span class="cellContent" data-col="'+rcol+'">'+t+'</span>');
             $inner.append($cellDiv);
           }
         }//End each column
@@ -757,14 +758,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   var initClick = function($t,settings){
     var tdclick = function(ev){
       var $td = $(ev.target);
-      if($td.is("td")){
+      if($td.is("td,.indexcol")){
         $td.off("click");
       }else{
-        $td.closest("td").off("click");
+        $td.closest("td,.indexcol").off("click");
       }
 
       if(!$td.is(".cellContent")){
          $td = $td.find(".cellContent");
+       }
+       if($td.length === 0){
+         $td = $(ev.target);
        }
 
       var inpKey = function(ev,$inp){
@@ -865,8 +869,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           $td.text(t);
         $inp.off("change");
         $inp.remove();
-        if(!$td.is("td")){
-          $td = $td.closest("td");
+        if(!$td.is("td,.indexcol")){
+          $td = $td.closest("td,.indexcol");
         }
         $td.click(tdclick);
 
@@ -881,10 +885,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       */
       var xid = $td.closest(".indexrow").attr("data-xd"),
         v = $td.text();
-        if(!$td.is(".cellContent")){
+        if(!$td.is(".cellContent,.indexcol")){
           v = $td.find(".cellContent").text();
         }
-      var $rtd = $td.is("td") ? $td : $td.closest("td,div");
+      var $rtd = $td.is("td,.indexcol") ? $td : $td.closest("td,.indexcol");
       var cellWidth = $rtd.outerWidth();
       $rtd.css("width",cellWidth + "px");
       //var iw = "width: " + cellWidth + "px";
