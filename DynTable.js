@@ -1,9 +1,11 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.50
+Dynamic Table v 1.52
 
 change Log:
-1.50 added editable list mode without labels
+1.52 added custom data type support for inline editing (select and checkbox) *no documentatiom yet -> beta
+1.51 added short definition for add form params
+1.51 added editable list mode without labels
 1.50 Fix: width change on input changed to take outer width
 1.50 Fix: detach click event on input was not set correcy and reselected the text again
 1.49 Fix: added confirmation to dsmx-btn from custom content
@@ -44,12 +46,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   var htmlEncode = function(t){
     return $("<div>").text(t).html().split('"').join('&quot;');
   };
+  var getColName = function(t){
+    // t = '<|colname|>'
+    return t.substr(t.indexOf("<|")+2,t.indexOf("|>")-t.indexOf("<|")-2);
+  };
   var replCustCont = function(row,t,cIs){
     var deb = 0;
     var jt;
     var joiner;
     while(t.indexOf("<|") !== -1 && deb < 900000000){
-      var cname = t.substr(t.indexOf("<|")+2,t.indexOf("|>")-t.indexOf("<|")-2);
+      var cname = getColName(t);//t.substr(t.indexOf("<|")+2,t.indexOf("|>")-t.indexOf("<|")-2);
       var rep = "<|"+cname+"|>";
       jt = row[cIs[cname]] || "";
       joiner = htmlEncode(jt);
@@ -310,9 +316,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
               id: rcol+r
             };
 
-          //add multiline class
+          //add dataType class
           if(settings.multilineCols.indexOf(rcol) !== -1){
             cellAttr.class = "indexcol multiline"
+          }
+          if(settings.dataTypes !== undefined && settings.dataTypes[rcol] !== undefined){
+            cellAttr.class+=" customDataType";
           }
 
           if($inner.is("tr")){
@@ -397,42 +406,56 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
       //add new record
       else if($el.attr("data-action") === "add"){
+        var params = {};
+        var param = function(set){
+          this.attrs = {
+              "type": set.type || "text",
+              "placeholder":set.placeholder || set.col,
+              "id":set.id || set.col,
+              "class":set.class || "form-control",
+              "name":set.col,
+              "data-validation": set["data-validation"],
+              "data-dr":set["data-dr"]
+            };
+          this.options = set.options;
+          this.label = {
+              "attrs":{
+                "text":set.label || set.col,
+                "for":set.id || set.col
+              }
+            };
+        };
+
         if($el.attr("data-params")!==''){
-          try{
-            var params = JSON.parse($el.attr("data-params").replace(/\"/g,'\\\"').replace(/\'/g,'"'));
-          }catch(er){
-            alert("JSON parse error. Check Console for details");
-            console.log(er);
-            var params = {};
+          if($el.attr("data-params").split(":")[0]==="js"){
+            var shortParams = eval($el.attr("data-params").split(":")[1]);
+            for(var p = 0; p < shortParams.length; p++){
+              params[shortParams[p].col] = new param(shortParams[p]);
+            }
+
+          }else{
+            try{
+              params = JSON.parse($el.attr("data-params").replace(/\"/g,'\\\"').replace(/\'/g,'"'));
+            }catch(er){
+              alert("JSON parse error. Check Console for details");
+              console.log(er);
+              params = {};
+            }
           }
+
         }else{
           //no params in custom content add elem. add all editable fields
-          var params = {};
           for(var c = 0; c < settings.columns.length; c++){
             var col = settings.columns[c];
             if(settings.editBlacklist.indexOf(col) === -1 && col !== ""){
-              params[col] = {
-                "attrs":{
-                  "type": "text",
-                  "placeholder":col,
-                  "id":col,
-                  "class":"form-control",
-                  "name":col
-                },
-                "label":{
-                  "attrs":{
-                    "text":col,
-                    "for":col
-                  }
-                }
-              };
+              params[col] = new param({col:col});
             }
           }
         }
         //remove old panel if still in DOM
         $('#newLeadPanel'+settings.tableID).remove();
         //create new lead form
-        var $panel = $('<div id="newLeadPanel'+settings.tableID+'" class="panel panel-default" style="position:absolute;z-index:99;width:'+$el.attr("data-width")+'px"></div>');
+        var $panel = $('<div id="newLeadPanel'+settings.tableID+'" class="panel panel-default" style="position:absolute;z-index:99;width:'+$el.attr("data-width")+'px;box-shadow: 0px 0px 100vh 100vh rgba(0,0,0,0.6);"></div>');
         var $panelBody = $('<div class="panel-body"></div>');
         var $closebtn = $('<button class="btn btn-danger btn-xs" style="float:right">x</button>');
         if($el.is("[data-title]")){
@@ -458,8 +481,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
               $i.append('<option value="'+item.options[o].value+'">'+item.options[o].text+'</option>');
             }
           }
-
-          $fGroup.append($i);
+          if(item.attrs.type==="checkbox" && item.label !== undefined){
+            $i.removeClass("form-control");
+            $label.prepend($i);
+            $fGroup.removeClass("form-group").addClass("checkbox");
+          }else{
+            $fGroup.append($i);
+          }
           $panelBody.append($fGroup);
         }
         var $addBtn = $('<button class="btn btn-default" id="newUser'+settings.tableID+'">'+$el.attr("data-btn-caption")+'</button>');
@@ -473,6 +501,38 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           "top": t
         });
         $(window).scrollTop( t );
+
+        //add Data Relation Options
+        var loadDrOptions = function(opts){
+          var item = opts.item;
+          var $dummyOption = $(item).find("option[value^='<|']").hide();
+          dsmxapi.get({
+            dr:opts.dr,
+            query:{
+              "mode" : "data",
+              "filter": null,
+              "columns": null
+            },
+            callback: function(data){
+              var drOptions = dsmxapi.fromTableToArray(data);
+              var vCol = getColName($dummyOption.val());
+              var tCol = getColName($dummyOption.text());
+              var newOptions = "";
+              for(var r = 0; r < drOptions.length; r++){
+                //add dr option
+                newOptions += '<option value="'+drOptions[r][vCol]+'">'+ drOptions[r][tCol] +'</option>\n';
+              }
+              $dummyOption.after(newOptions);
+            }
+          });
+        };
+
+        $panel.find("[data-dr]").each(function(){
+          loadDrOptions({
+              item: this,
+              dr: $(this).attr("data-dr")
+            });
+        });
 
         //events
         $closebtn.click(function(){
@@ -775,7 +835,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         var ix = Number($inp.closest("[data-ix"+settings.tableID+"]").attr("data-ix" + settings.tableID));
         var tdp = Number($inp.closest("[data-it"+settings.tableID+"]").attr("data-it" + settings.tableID));
         var trp = Number($inp.closest("[data-rx"+settings.tableID+"]").attr("data-rx" + settings.tableID))
-        var code = ev.keyCode || ev.which;
+        var code = Number(ev.keyCode || ev.which);
         var goNext = function(ev){
           ix++;
           var $nx = $("[data-ix"+settings.tableID+"='"+ix+"']");
@@ -814,45 +874,54 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         };
 
         //returns
-        if (code == '9' || code == '13') {
-          if(!$inp.is("textarea")){
+        if (code === 9 || code === 13) {
+          if(!$inp.is("textarea,select")){
             goNext(ev);
           }
-        }else if(code == '38'){
+        }else if(code == 38){
           //up
           if(!$inp.is("textarea")){
             goUp(ev);
           }else{
             var pos = $inp.getCursorPosition();
-            if(pos == 0){
+            if(pos <= 0 || $inp.is("[type='checkbox']")){
               goUp(ev);
             }
           }
 
-        }else if (code == '37'){
+        }else if (code === 37){
           //left
-          var pos = $inp.getCursorPosition();
-          if(pos == 0){
+          if(!$inp.is("select")){
+            var pos = $inp.getCursorPosition();
+            if(pos <= 0 || $inp.is("[type='checkbox']")){
+              goPrev(ev);
+            }
+          }else{
             goPrev(ev);
           }
         }
-        else if (code == '39'){
+        else if (code === 39){
           //right
-          var tl = $inp.val().length;
-          var pos = $inp.getCursorPosition();
-          if(tl == pos){
-            goNext(ev);
+          if(!$inp.is("select")){
+            var tl = $inp.val().length;
+            var pos = $inp.getCursorPosition();
+            if(tl <= pos || $inp.is("[type='checkbox']")){
+              goNext(ev);
+            }
+          }else{
+              goNext(ev);
           }
 
+
         }
-        else if (code == '40'){
+        else if (code === 40){
           //down
           if(!$inp.is("textarea")){
             goDown(ev);
-          }else{
+          }else if($inp.is("textarea")){
             var tl = $inp.val().length;
             var pos = $inp.getCursorPosition();
-            if(tl == pos){
+            if(tl <= pos){
               goDown(ev);
             }
           }
@@ -865,6 +934,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           v = $inp.attr("data-oldv"),
           xid = $inp.attr("data-xid"),
           $td = $inp.parent();
+          if($inp.is("[type='checkbox']")){
+            t = $inp.prop("checked").toString();
+          }
           var col = $td.attr("data-col");
           $td.text(t);
         $inp.off("change");
@@ -902,6 +974,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                   "data-xid":xid,
                   "style": iw
                   };
+
+
+
+      //multiline
       if($td.is(".multiline") || $td.parent().is(".multiline")){
         var inputTag = "<textarea>";
         delete inputAttrs.type;
@@ -909,12 +985,42 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         inputAttrs.rows = "4";
       }
 
-       var $inp = $(inputTag,inputAttrs);
+      var $inp = $(inputTag,inputAttrs);
 
-      $inp.val(v);
+      //customDataType
+      if($td.is(".customDataType") || $td.parent().is(".customDataType")){
+        var colName = $td.attr("data-col") || $td.parent().attr("data-col");
+        if(settings.dataTypes[colName].type === "select"){
+          inputTag = "<select>";
+        }else if(settings.dataTypes[colName].type === "checkbox"){
+          inputAttrs.type="checkbox";
+        }
+
+        $inp = $(inputTag,inputAttrs);
+
+        //add select options
+        if(settings.dataTypes[colName].type === "select"){
+          var options = settings.dataTypes[colName].values;
+          var oml = "";
+          for(var x = 0; x < options.length; x++){
+            oml+='<option value="'+ (options[x].value || options[x].text) + '">' + (options[x].text || options[x].value) + '</option>';
+          }
+          $inp.html(oml);
+        }
+      }
+
+
+
+
       $td.text("");
+      $inp.val(v);
+      if($inp.is("[type='checkbox']")){
+        var trues = ["true","1",1,"Yes"];
+        if(trues.indexOf(v)!==-1){
+          $inp.prop("checked",true);
+        }
+      }
       $td.append($inp);
-
       $inp.focus().select();
 
       if(settings.cursor){
@@ -935,6 +1041,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       $inp.focusout(function(){
         if(!settings.disableChange)inpChange($(this));
       });
+      if($inp.is("select")){
+        $inp.change(function(){
+          inpChange($(this));
+        });
+      }
     };
     var $tds = tdIndexes($t,settings);
     $tds.click(tdclick);
