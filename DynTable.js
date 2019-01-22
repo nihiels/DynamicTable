@@ -1,8 +1,11 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.52
+Dynamic Table v 1.54
 
 change Log:
+1.54 added url params support -> requires urlParams object (x-item is attached to project)
+1.53 fixed records per page was not reset after filtering
+1.53 added init on custom event
 1.52 added custom data type support for inline editing (select and checkbox) *no documentatiom yet -> beta
 1.51 added short definition for add form params
 1.51 added editable list mode without labels
@@ -362,7 +365,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       var dec = $sth.attr("data-dec") === "true" || $sth.attr("data-dec") === "" ?"false":"true";
       settings.sortCols = [$sth.attr("data-col")];
       settings.dec = dec;
-      getRecords($t,settings,settings.rpp,[$sth.attr("data-col")],dec);
+      var rpp = settings.orpp || settings.rpp;
+      getRecords($t,settings,rpp,[$sth.attr("data-col")],dec);
       $t.find("[data-dec]").removeAttr("data-dec");
       $sth.attr("data-dec",dec);
     });
@@ -415,7 +419,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
               "class":set.class || "form-control",
               "name":set.col,
               "data-validation": set["data-validation"],
-              "data-dr":set["data-dr"]
+              "data-dr":set["data-dr"],
+              "data-filter":set["data-filter"],
+              "value":set.value || ""
             };
           this.options = set.options;
           this.label = {
@@ -424,6 +430,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 "for":set.id || set.col
               }
             };
+          if(set.type === "textarea"){
+            this.attrs.class = set.class || "form-control inp";
+            this.attrs.rows = set.rows || "4";
+          }
         };
 
         if($el.attr("data-params")!==''){
@@ -480,7 +490,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             for(var o = 0; o < item.options.length; o++){
               $i.append('<option value="'+item.options[o].value+'">'+item.options[o].text+'</option>');
             }
+          }else if(item.attrs.type === "textarea"){
+            //textarea
+            $i = $("<textarea>",item.attrs);
           }
+
           if(item.attrs.type==="checkbox" && item.label !== undefined){
             $i.removeClass("form-control");
             $label.prepend($i);
@@ -510,7 +524,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             dr:opts.dr,
             query:{
               "mode" : "data",
-              "filter": null,
+              "filter": opts.filter || null,
               "columns": null
             },
             callback: function(data){
@@ -530,7 +544,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         $panel.find("[data-dr]").each(function(){
           loadDrOptions({
               item: this,
-              dr: $(this).attr("data-dr")
+              dr: $(this).attr("data-dr"),
+              filter: $(this).attr("data-filter")!==undefined?$(this).attr("data-filter").replace(/\</g,"<|").replace(/\>/g,"|>"):null
             });
         });
 
@@ -748,7 +763,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           dsmx.api.dataRelations.count(settings.dataRelationName, settings.query, function(result){
           settings.successCallback(result,function(c){
             settings.all = c;
-            getRecords($t,settings,settings.rpp);
+            var rpp = settings.orpp || settings.rpp;
+            getRecords($t,settings,rpp);
           },settings.successFail);
         }, settings.failCallback);
 
@@ -981,8 +997,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       if($td.is(".multiline") || $td.parent().is(".multiline")){
         var inputTag = "<textarea>";
         delete inputAttrs.type;
-        inputAttrs.class = "form-control inp";
-        inputAttrs.rows = "4";
+        //inputAttrs.class = "form-control inp";
+        //inputAttrs.rows = "4";
       }
 
       var $inp = $(inputTag,inputAttrs);
@@ -994,6 +1010,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           inputTag = "<select>";
         }else if(settings.dataTypes[colName].type === "checkbox"){
           inputAttrs.type="checkbox";
+        }else if(settings.dataTypes[colName].type === "textarea"){
+          var inputTag = "<textarea>";
         }
 
         $inp = $(inputTag,inputAttrs);
@@ -1073,9 +1091,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
               settings.page = settings.page === 1?1:settings.page-1;
               break;
           case "last":
-          settings.page = settings.mpage;
+            settings.page = settings.mpage;
           break;
           default:
+            settings.orpp = settings.orpp || settings.rpp;
             settings.page = settings.all <= settings.rpp?1:settings.page+1;
         }
         if(pp !== settings.page){
@@ -1112,6 +1131,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     }
     //select rpp
     if(settings.rpp > settings.all){
+      settings.orpp = settings.orpp || settings.rpp;
       settings.rpp = settings.all;
     }
     $ppSelect.find("option[value='"+settings.rpp+"']").prop("selected",true);
