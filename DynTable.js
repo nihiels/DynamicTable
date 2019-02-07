@@ -1,9 +1,10 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.54
+Dynamic Table v 1.55
 
 change Log:
-1.54 added url params support -> requires urlParams object (x-item is attached to project)
+1.55 add new record hides form-goups when input type="hidden"
+1.54 added url params support -> requires urlParams object (x-item is attached to project) and restrict to columns must have column names
 1.53 fixed records per page was not reset after filtering
 1.53 added init on custom event
 1.52 added custom data type support for inline editing (select and checkbox) *no documentatiom yet -> beta
@@ -465,7 +466,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         //remove old panel if still in DOM
         $('#newLeadPanel'+settings.tableID).remove();
         //create new lead form
-        var $panel = $('<div id="newLeadPanel'+settings.tableID+'" class="panel panel-default" style="position:absolute;z-index:99;width:'+$el.attr("data-width")+'px;box-shadow: 0px 0px 100vh 100vh rgba(0,0,0,0.6);"></div>');
+        var $panel = $('<div id="newLeadPanel'+settings.tableID+'" class="panel panel-default" style="height: auto;position:absolute;z-index:99;width:'+$el.attr("data-width")+'px;box-shadow: 0px 0px 100vh 100vh rgba(0,0,0,0.6);"></div>');
         var $panelBody = $('<div class="panel-body"></div>');
         var $closebtn = $('<button class="btn btn-danger btn-xs" style="float:right">x</button>');
         if($el.is("[data-title]")){
@@ -501,6 +502,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             $fGroup.removeClass("form-group").addClass("checkbox");
           }else{
             $fGroup.append($i);
+          }
+          if(item.attrs.type==="hidden"){
+            $fGroup.css("display","none");
           }
           $panelBody.append($fGroup);
         }
@@ -607,7 +611,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 methods.reload($t);
                 if($el.is("[data-success]")){
                   var f = eval($el.attr("data-success"));
-                  f(el,nrecTable,settings.tableID);
+                  f(el,nrecTable,settings.tableID,r);
                 }
               }
             });
