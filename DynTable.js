@@ -1105,13 +1105,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       });
 
     }
-    settings.mpage = Math.ceil(settings.all / settings.rpp);
+
+    //rpp
+    if(settings.rpp > settings.all){
+      settings.orpp = settings.orpp || settings.rpp;
+      settings.rpp = settings.all;
+    }
+    if(settings.rpp === 0){
+        settings.rpp = settings.orpp;
+    }
+
+    settings.mpage = settings.all !== 0 ? Math.ceil(settings.all / settings.rpp) : 1;
     //Seite {p} von {mp}, Daten {x} bis {y} von {all}
-    var fromR = settings.page * settings.rpp - settings.rpp+1;
+    var fromR = settings.all !== 0 ? settings.page * settings.rpp - settings.rpp+1 : 0;
     var toR = settings.page * settings.rpp;
     if(settings.page === settings.mpage){
       toR = settings.all;
     }
+
+
 
     var pText = settings.pText.replace(/\{all\}/g,settings.all).replace(/\{p\}/g,settings.page).replace(/\{mp\}/g,settings.mpage).replace(/\{x\}/g,fromR).replace(/\{y\}/g,toR);
     $pd.html(pText);
@@ -1131,11 +1143,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       $option.attr("value",maxOption);
       $ppSelect.append($option.clone());
     }
-    //select rpp
-    if(settings.rpp > settings.all){
-      settings.orpp = settings.orpp || settings.rpp;
-      settings.rpp = settings.all;
-    }
+
     $ppSelect.find("option[value='"+settings.rpp+"']").prop("selected",true);
   };
 
