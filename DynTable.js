@@ -1,8 +1,9 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.55
+Dynamic Table v 1.56
 
 change Log:
+1.56 fixed: head filter lost translation and pager was not updating after filtering
 1.55 add new record hides form-goups when input type="hidden"
 1.54 added url params support -> requires urlParams object (x-item is attached to project) and restrict to columns must have column names
 1.53 fixed records per page was not reset after filtering
@@ -94,6 +95,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         var trs = settings.trans[t].split(":");
         trans[trs[0]] = trs[1];
       }
+      settings.translations = trans;
     }
     //set cols
     settings.columns = settings.cols !== null && settings.cols[0] !== "" ? settings.cols.slice() : response.columns.slice();
@@ -263,14 +265,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       getRecords($el,options);
     },
     addRows: function($el,settings,rows,$outer,$inner){
-      //set translations
-      if(settings.trans !== undefined){
-        var trans = {};
-        for(var t = 0; t < settings.trans.length; t++){
-          var trs = settings.trans[t].split(":");
-          trans[trs[0]] = trs[1];
-        }
-      }
+
+      var trans = settings.translations;
 
       var xI = settings.cIs.xmediaID;
       var activeRecord = settings.activeRecord;
@@ -734,11 +730,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       var t = $inp.val(),
         $td = $inp.parent();
         var col = $td.attr("data-col");
-      $td.find("span").text(col + " ~ " + t);
+        var colTrans = settings.translations[col]||col;
+      $td.find("span").text(colTrans + " ~ " + t);
       var prevFilter = $td.attr("data-filter") === undefined?"":$td.attr("data-filter");
       $td.attr("data-filter",t);
       if(t === ""){
-        $td.find("span").text(col);
+        $td.find("span").text(colTrans);
       }
       $td.attr("data-filter",t);
       $inp.remove();
@@ -768,6 +765,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           settings.successCallback(result,function(c){
             settings.all = c;
             var rpp = settings.orpp || settings.rpp;
+            settings.page = 1;
             getRecords($t,settings,rpp);
           },settings.successFail);
         }, settings.failCallback);
