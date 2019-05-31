@@ -1,8 +1,10 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.56
+Dynamic Table v 1.58
 
 change Log:
+1.58 feature: store filter in session storage
+1.57 fixed: event handlers where applying to body. now they are restricted to the table item
 1.56 fixed: head filter lost translation and pager was not updating after filtering
 1.55 add new record hides form-goups when input type="hidden"
 1.54 added url params support -> requires urlParams object (x-item is attached to project) and restrict to columns must have column names
@@ -690,27 +692,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     //"<div class=\"btn-group\" ><button data-params=\"Firstname:text:Vorname,Lastname:text:Nachname,Salutation:select:Anrede:Herr|Mr.;Frau|Mrs.\" class=\"btn btn-default\" data-action=\"add\" data-action=\"add\" data-title=\"New lead\">new lead</button></div>"
 
     //Register custom handlers
-    $("body").find("[data-action]").off('click').click(function(ev){
+    $t.parent().find("[data-action]").off('click').click(function(ev){
       ev.preventDefault();
       action(this);
     });
-    $("body").find("[data-change]").change(function(ev){
+    $t.parent().find("[data-change]").change(function(ev){
       ev.preventDefault();
       action(this);
     });
 
-    $("body").find("[data-con]").each(function(){
+    $t.parent().find("[data-con]").each(function(){
       var con = eval($(this).attr("data-con"));
       if(!con){
         $(this).hide();
       }
     });
 
-    $("body").find("[data-each]").each(function(){
+    $t.parent().find("[data-each]").each(function(){
       var f = eval($(this).attr("data-each"));
       f(this);
     });
-    $("body").find("[data-hide],[data-show]").each(function(){
+    $t.parent().find("[data-hide],[data-show]").each(function(){
       $(this).click(function(){
         var hs = $(this).attr("data-hide");
         var ss = $(this).attr("data-show");
@@ -726,6 +728,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   };
 
   var initFilter = function($t,settings){
+    var restoreFilter = function(){
+      var filterO = JSON.parse(sessionStorage.getItem("flterO"+settings.tableID));
+      for (fCol in filterO){
+        if(filterO[fCol] !== ''){
+          var colTrans = settings.translations[fCol]||fCol;
+          $t.find("th[data-col = '"+fCol+"']").attr("data-filter",filterO[fCol])
+          .find("span").text(colTrans + " ~ " + filterO[fCol]);
+        }
+      }
+    };
+    if(settings.keepFilter && storageAvailable('sessionStorage')){
+      restoreFilter();
+    }
     var finpChange = function($inp){
       var t = $inp.val(),
         $td = $inp.parent();
@@ -742,9 +757,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
       var $activeFilters = $t.find("th[data-filter]");
       var thFilterString = "";
+      var filterO = {};
       for(var f = 0; f < $activeFilters.length; f++){
         var fcol = $($activeFilters[f]).attr("data-col");
         var fs = $($activeFilters[f]).attr("data-filter");
+        //store filter
+        filterO[fcol] = fs;
+
         if(f === 0){
           thFilterString += "(<|" +fcol+"|> Contains '" + fs + "')";
         }else if($activeFilters.length > 1){
@@ -761,6 +780,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       }
 
         if(t !== prevFilter){
+          //store filter
+          if(settings.keepFilter && storageAvailable('sessionStorage')){
+            sessionStorage.setItem("dynFilter"+settings.tableID,settings.query.filter);
+            sessionStorage.setItem("flterO"+settings.tableID,JSON.stringify(filterO));
+          }
+
           dsmx.api.dataRelations.count(settings.dataRelationName, settings.query, function(result){
           settings.successCallback(result,function(c){
             settings.all = c;
@@ -1210,6 +1235,29 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       },settings.successFail);
       }, settings.failCallback);
   };
+  var storageAvailable = function(type) {
+    try {
+        var storage = window[type],
+            x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    }
+    catch(e) {
+        return e instanceof DOMException && (
+            // everything except Firefox
+            e.code === 22 ||
+            // Firefox
+            e.code === 1014 ||
+            // test name field too, because code might not be present
+            // everything except Firefox
+            e.name === 'QuotaExceededError' ||
+            // Firefox
+            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            storage.length !== 0;
+    }
+  };
 
     $.fn.dynTable = function( options, overrides ) {
       //Store return object in $t
@@ -1221,7 +1269,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         var settings = mergeSettings($t,options);//$.extend({},$.fn.dynTable.settings, options );
         settings.me = $t;
         //Filter Handling
-
         //Save original filter for client Filtering
         if (settings.query.filter !== null && settings.query.filter !== ""){
           //unencode html encodings of filter string
@@ -1239,6 +1286,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }else{
           settings.query.filter = null;
         }
+        //get filter from session storage
+        if(settings.keepFilter && storageAvailable('sessionStorage') && sessionStorage.getItem("dynFilter"+settings.tableID) !== null && sessionStorage.getItem("dynFilter"+settings.tableID) !== undefined){
+          //settings.query.oFilter = settings.query.filter;
+          settings.query.filter = sessionStorage.getItem("dynFilter"+settings.tableID)!=="null"?sessionStorage.getItem("dynFilter"+settings.tableID):settings.query.filter;
+          //sessionStorage.setItem("dynFilter"+settings.tableID,null);
+        }
+
         //End Filter Handling
 
         //Check Columns
