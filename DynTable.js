@@ -1,8 +1,9 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.58
+Dynamic Table v 1.59
 
 change Log:
+1.59 feature: update records in a different data relation
 1.58 feature: store filter in session storage
 1.57 fixed: event handlers where applying to body. now they are restricted to the table item
 1.56 fixed: head filter lost translation and pager was not updating after filtering
@@ -1176,7 +1177,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
   var updateRecord = function(settings,xid,col,val,$td,cb){
     $td.addClass("updating");
-
+    var updateRelation = settings.updateRelation || settings.dataRelationName;
     //The records that should be updatet
     var table = {
       "columns" : ["xmediaID",col],
@@ -1186,7 +1187,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     };
 
 
-    dsmx.api.dataRelations.update(settings.dataRelationName, table, function(result){
+    dsmx.api.dataRelations.update(updateRelation, table, function(result){
       settings.successCallback(result,function(){
         $td.removeClass("updating");
         if(cb !== undefined){
