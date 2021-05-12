@@ -1,8 +1,9 @@
 /*Copyright 2019 nils pfeifenberger
 
-Dynamic Table v 1.60
+Dynamic Table v 1.61
 
 change Log:
+1.61 load bootstrap vie cdn, optional...
 1.60 feature: get filter from JS variable
 1.59 feature: update records in a different data relation
 1.58 feature: store filter in session storage

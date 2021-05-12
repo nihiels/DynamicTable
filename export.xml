@@ -1,0 +1,39 @@
+﻿<Part Name="provideParams" ThumbNailUrl="" Details="" Categorie="Extensions" ThumbName="" IsLocked="False" OmitGroup="True" Origin="Account" DesignatedPageType="All">
+  <Group ID="c20280ea-8200-49b9-a108-cb469d7db84a" StyleVariation="1" Width="-1" Height="-1" HorizontalAlignment="Left" VerticalAlignment="Top" BorderColor="" BorderColorizeMode="BaseColor" TextStyleVariation="1" ContentIsHidden="False" HtmlId="" HtmlClass="" LockChildItems="False" LockChildGroups="False" HiddenContentCaption="xyz" IsLocked="UnLocked" SerializedVersion="4" HTMLName="" ShowAsjQueryButton="False" MobileTheme="No" IgnoreHTMLCheckForUnclosedAttributes="False" Orientation="False" IsVisible="True" CSSBorderColor="red" CSSBorderThickness="0" CSSBackColor="" UseCondition="False" Assignment="''" ValueToMatch="" SwitchID="" DisplayMode="ShowAlways">
+    <Extension ID="9d006904-2786-48f5-ab24-16a9534c2d0a" HorizontalAlignment="Center" TextStyleVariation="0" SerializedVersion="1" Orientation="True" IsVisible="False" CSSBorderColor="red" CSSBorderThickness="0" CSSBackColor="" IsStacked="false" AddOverflowHidden="false" RevertRenderingOrder="false" UseCondition="False" Assignment="''" ValueToMatch="" SwitchID="" DisplayMode="ShowAlways" Name="provideParams" DisplayName="URL Params" SerializedXItemVer="3" IsInputItem="False" DatabaseField="" ImageName="" ImageSource="Unknown" ManualURL="" UseItemSize="false" UseJQueryUI="false" UseTinyMCE="false" OnlyOncePerPage="true" RewriteClass="false" RewriteID="false" DataMode="PlainHtml" HTMLParsingEnabled="True" HasData="false" DataRelationName="" RestrictItems="false" LayoutSupport="MarginAlignment" UseInEMailOnly="False">
+      <DocModel Rotation="0" Left="0" Top="0" BorderThickness="0" CornerRadius="0" BorderColor="red" BackColor="" BorderColorSwatchName="" BackColorSwatchName="" PadLeft="0" PadRight="0" PadTop="0" PadBottom="0" Opacity="1" ColumnCount="1" ColumnGap="10" UseCondition="False" SwitchID="" DisplayMode="ShowAlways" VerticalAlignment="Top" PropMode="False" HasGradient="False" LockPosition="False" LockSize="False" LockTextEdit="False" LockImageReplace="False" LockInFront="False" LockInArea="False" LockInAreaLeft="0" LockInAreaTop="0" LockInAreaWidth="0" LockInAreaHeight="0" RestrictToTextStyle="False" AllowMultipleStyles="False" EnableKeepRatio="False" EnableRemove="True" EnableRotate="True" EnableCropping="True" EnableBackgroundColor="False" TextStyleVariation="-1" SelectedTextStyleVariations="" ImageSelector="" ImageCategories="" Class="" LayerID="" ShowImageBrowser="False" EnableImageUpload="False" />
+      <ScriptActions>
+        <ScriptAction ID="677f4946-687c-4222-9176-a2d877bf7549" DisplayName="Properties" ScriptName="HtmlWebContentProperties" Description="provides URL params" JSEvent="OnLoad" AvailableJSEvents="1023" Category="" Version="4" OnLoadOnly="false" OnlyOncePerPage="false" NeedsjQueryUI="false" NeedsResponsiveDesign="false" MajorVersion="1" MinorVersion="0" RenderVersion="Current" AllowCreationFromImageConversion="false" UseCrossMediaAPI="False" UseCrossMediaUIHelperAPI="False" KnockoutVersion="None" BootstrapVersion="None" AdminOnly="False">
+          <ScriptParams>
+            <ScriptParam Name="varName" DisplayName="Variable name" ParamValue="urlParams" ParamType="ShortText" IsNeeded="True" IsNone="False" Description="alert(urlParams[&quot;mode&quot;]);" NeedsEncoding="false" EncodingType="Plain" MaxValue="1,79769313486232E+308" MinValue="-1,79769313486232E+308" ShowInTree="false" Prefix="" Postfix="" IsTranslatable="false" ParamGroupID="" ThrowErrorIfNotDefined="false" ImageWidth="-1" ImageHeight="-1" KeepRatio="True" ForceImageStretch="True" AllowExternalImages="True" Url="http://www.directsmile.com" LinkType="Internal" DatabaseBindingEnabled="False" InternalLink="''" SelectorIsClass="True" />
+          </ScriptParams>
+          <ScriptTemplates>
+            <ScriptTemplate ID="d6f7be13-07be-4596-94de-f7c1b49dab44" ScriptType="PlainJS" ScriptPosition="EndOfPage" Name="Script">
+              <Template><![CDATA[var {{varName}};
+(window.onpopstate = function () {
+    var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+        query  = window.location.search.substring(1);
+
+    urlParams = {};
+    while (match = search.exec(query))
+       urlParams[decode(match[1])] = decode(match[2]);
+})();]]></Template>
+            </ScriptTemplate>
+          </ScriptTemplates>
+        </ScriptAction>
+      </ScriptActions>
+      <HTMLItem>
+        <Text ID="a3304ab9-0701-4e83-8e6b-abeb3be7d1ee" TextStyleVariation="0" SerializedVersion="7" Text="&lt;!-- Write your HTML code here, you can define and use paramters, like {{someText}}.&#xD;&#xA;Use the child_content parameter to active the child mode for the extension item. //--&gt;" IsHtmlText="True" XAML="&lt;Section xml:space=&quot;preserve&quot; HasTrailingParagraphBreakOnPaste=&quot;False&quot; xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;&gt;&#xD;&#xA;  &lt;Paragraph&gt;&#xD;&#xA;    &lt;Run Text=&quot;Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.&quot; /&gt;&#xD;&#xA;  &lt;/Paragraph&gt;&#xD;&#xA;&lt;/Section&gt;" RichHtml="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua." FitText="True">
+          <DocModel Rotation="0" Left="0" Top="0" BorderThickness="0" CornerRadius="0" BorderColor="red" BackColor="" BorderColorSwatchName="" BackColorSwatchName="" PadLeft="0" PadRight="0" PadTop="0" PadBottom="0" Opacity="1" ColumnCount="1" ColumnGap="10" UseCondition="False" SwitchID="" DisplayMode="ShowAlways" VerticalAlignment="Top" PropMode="False" HasGradient="False" LockPosition="False" LockSize="False" LockTextEdit="False" LockImageReplace="False" LockInFront="False" LockInArea="False" LockInAreaLeft="0" LockInAreaTop="0" LockInAreaWidth="0" LockInAreaHeight="0" RestrictToTextStyle="False" AllowMultipleStyles="False" EnableKeepRatio="False" EnableRemove="True" EnableRotate="True" EnableCropping="True" EnableBackgroundColor="False" TextStyleVariation="-1" SelectedTextStyleVariations="" ImageSelector="" ImageCategories="" Class="" LayerID="" ShowImageBrowser="False" EnableImageUpload="False" />
+        </Text>
+      </HTMLItem>
+      <Header />
+      <WebContent><![CDATA[<!-- Write your HTML code here, you can define and use paramters, like {{someText}}.
+Use the child_content parameter to active the child mode for the extension item. //-->]]></WebContent>
+      <CSSContent />
+    </Extension>
+  </Group>
+</Part>
